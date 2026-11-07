@@ -1,7 +1,7 @@
 // A lazy file browser for the focused pane's folder, with bounded read-only previews.
 import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, Editor, EditorState, TextView } from "gpui-base";
-import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, window, run } from "herdr";
+import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, window, run, openOverlay } from "herdr";
 
 function location() {
   const space = spaces().find(s => s.active), f = focused();
@@ -42,6 +42,7 @@ async function directory(path, on) {
 export default class Files extends View {
   init(_props, cx) {
     this.saved = new Map();
+    this.showHidden = localStorage.getItem("showHidden") !== "0";   // dotfiles; remembered
     this.entries = new Map(); this.folders = new Set(); this.pending = new Set(); this.marks = {};
     this.refresh(cx);
     cx.timer.every(10000, cx => this.refresh(cx));
@@ -150,6 +151,11 @@ export default class Files extends View {
     });
   }
 
+  // Right-click on a folder: a small menu (Open Claude Code here).
+  folderMenu(path) {
+    openOverlay({ mod: "files-menu", kind: "popup", frame: "none", width: 230, height: 74, props: { folder: `${this.root}/${path}`, on: this.on ?? null } });
+  }
+
   // ↗ in the header: the open markdown file in a live-reloading pane beside the terminals.
   openPane() {
     run("pane.split", { direction: "right", mod: "md-viewer", props: { file: `${this.root}/${this.file}`, on: this.on ?? null } });
@@ -184,11 +190,12 @@ export default class Files extends View {
 
   rows(prefix, depth, out, t) {
     if (out.length >= TOTAL || depth > 40) return out;
-    for (const entry of this.entries.get(prefix) ?? []) {
+    for (const entry of (this.entries.get(prefix) ?? []).filter(e => this.showHidden || !e.name.startsWith("."))) {
       if (out.length >= TOTAL) break;
       const path = prefix ? `${prefix}/${entry.name}` : entry.name, open = this.folders.has(path), mark = this.marks[`${this.root}/${path}`];
       out.push(h_flex().id(`file-${path}`).h(24).flex_none().pl(8 + depth * 18).pr(8).gap(7).items_center().cursor_pointer().hover(s => s.bg(t.hover))
         .on_click((_e, cx) => entry.dir ? this.toggle(path, cx) : this.show(path, cx))
+        .on_mouse_down("right", () => { if (entry.dir) this.folderMenu(path); })
         .child(entry.dir ? svg(`mods/my-files/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim) : div().w(12).flex_none())
         .child(svg(`mods/my-files/${entry.dir ? "folder" : "file"}.svg`).size(14).flex_none().text_color(t.muted))
         .child(div().flex_1().min_w(0).truncate().child(entry.name))
@@ -206,6 +213,9 @@ export default class Files extends View {
         .when(Boolean(this.file), el => el.child(div().id("files-back").w(20).cursor_pointer().text_color(t.muted).on_click((_e, cx) => { const prev = this.mdBack?.pop(); this.show(prev ?? null, prev ? cx : undefined); cx.notify(); }).child("←")))
         .child(div().font_semibold().child("Files"))
         .child(div().flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim).child(this.file ?? this.root?.split(/[\\/]/).pop() ?? ""))
+        .when(!this.file, el => el.child(this.chip("hidden-toggle", "Hidden", this.showHidden, t, (_e, cx) => {
+          this.showHidden = !this.showHidden; localStorage.setItem("showHidden", this.showHidden ? "1" : "0"); cx.notify();
+        }).tooltip(this.showHidden ? "Hide hidden files" : "Show hidden files")))
         .when(isMarkdown(this.file) && this.markdown !== null, el => el
           .child(this.chip("md-preview", "Preview", !this.mdSource, t, (_e, cx) => { this.mdSource = false; cx.notify(); }))
           .child(this.chip("md-source", "Source", this.mdSource, t, (_e, cx) => { this.mdSource = true; cx.notify(); }))
