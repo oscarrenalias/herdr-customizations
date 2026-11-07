@@ -85,12 +85,12 @@ export default class History extends View {
   }
 
   renderList(t) {
-    return v_flex().id("history-list").flex_1().min_h(0).overflow_y_scrollbar().p(6).gap(1)
+    return v_flex().id("history-list").flex_1().min_h(0).overflow_y_scrollbar().p(2).gap(1)
       .children(this.commits.map(c =>
-        v_flex().id(`commit-${c.hash}`).flex_none().px(8).py(6).gap(2).rounded(7).cursor_pointer().hover(s => s.bg(t.hover))
+        v_flex().id(`commit-${c.hash}`).flex_none().px(8).py(4).gap(2).cursor_pointer().hover(s => s.bg(t.hover))
           .on_click((_e, cx) => this.open(c, cx))
           .child(h_flex().gap(6).items_center().min_w(0)
-            .children(c.refs.slice(0, 2).map(r => div().flex_none().px(5).rounded(4).text_size(10).bg(t.selected).text_color(t.accent).child(r.replace("HEAD -> ", ""))))
+            .children(c.refs.slice(0, 2).map(r => div().flex_none().px(5).text_size(10).bg(t.selected).text_color(t.accent).child(r.replace("HEAD -> ", ""))))
             .child(div().flex_1().min_w(0).truncate().child(c.subject)))
           .child(div().truncate().text_size(11).text_color(t.dim).child(`${c.short} · ${c.author} · ${c.when}`))))
       .when(Boolean(this.error) || !this.commits.length, el => el.child(div().p(8).text_size(12).text_color(t.dim)
@@ -99,7 +99,7 @@ export default class History extends View {
 
   renderDetail(t) {
     const d = this.detail;
-    return v_flex().id("history-detail").flex_1().min_h(0).overflow_y_scrollbar().p(10).gap(0)
+    return v_flex().id("history-detail").flex_1().min_h(0).overflow_y_scrollbar().p(6).gap(0)
       .text_size(11).font_family("JetBrains Mono")
       .when(!d, el => el.child(div().text_color(t.dim).child(this.detailError || "Loading commit…")))
       .when(Boolean(d), el => el.children(d.lines.map((line, i) =>
@@ -110,8 +110,8 @@ export default class History extends View {
   render(cx) {
     if (key() !== this.context?.key) this.refresh(cx);
     const t = theme(), sel = this.selected;
-    return v_flex().id("history").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
-      .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
+    return v_flex().id("history").size_full().min_h(0).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+      .child(h_flex().h(34).flex_none().px(10).gap(8).items_center().border_b(1).border_color(t.border)
         .when(Boolean(sel), el => el.child(div().id("history-back").w(20).cursor_pointer().text_color(t.muted).on_click((_e, cx) => { this.selected = null; this.detail = null; cx.notify(); }).child("←")))
         .child(div().font_semibold().child("History"))
         .child(div().flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim)

@@ -100,7 +100,7 @@ export default class MdViewer extends View {
   }
 
   chip(id, label, on, t, action) {
-    return div().id(id).h(24).px(9).flex().flex_none().items_center().rounded(6).cursor_pointer().text_size(11.5)
+    return div().id(id).h(24).px(9).flex().flex_none().items_center().cursor_pointer().text_size(11.5)
       .bg(on ? t.selected : t.background).text_color(on ? t.foreground : t.muted)
       .hover((s) => s.bg(t.hover)).on_click(action).child(label);
   }
@@ -109,7 +109,7 @@ export default class MdViewer extends View {
     const t = theme(), preview = this.mode === "preview";
     if (!this.file) return div().p(12).text_color(t.dim).child("No file given");
     return v_flex().id("md-root").size_full().min_h(0).bg(t.background).text_color(t.foreground).text_size(13)
-      .child(h_flex().h(38).flex_none().px(12).gap(6).items_center().border_b(1).border_color(t.border)
+      .child(h_flex().h(32).flex_none().px(10).gap(6).items_center().border_b(1).border_color(t.border)
         .when(this.back.length > 0, (el) => el.child(this.chip("md-back", "←", false, t, (_e, cx) => this.open(this.back.pop(), cx))))
         .child(div().font_semibold().flex_none().child(basename(this.file)))
         .child(div().flex_1().min_w(0).truncate().text_size(11).text_color(t.dim).child(dirname(this.file)))
@@ -120,7 +120,7 @@ export default class MdViewer extends View {
         this.source ? Editor.new(this.source).flex_1().min_h(0) : div().p(16).text_color(t.dim).child("Loading…")))
       .when(this.text !== null && preview, (el) => el.child(
         div().id("md-scroll").flex_1().min_h(0).overflow_y_scrollbar()
-          .child(h_flex().w_full().justify_center().px(24).py(18)
+          .child(h_flex().w_full().justify_center().px(16).py(12)
             .child(div().w_full().max_w(880).text_size(14)
               .child(TextView.markdown(`md-${this.version}`, this.text).selectable(true)
                 .on_link_click((url, cx) => this.follow(url, cx)))))));

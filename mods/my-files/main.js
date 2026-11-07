@@ -178,7 +178,7 @@ export default class Files extends View {
   }
 
   chip(id, label, on, t, action) {
-    return div().id(id).h(24).px(8).flex().flex_none().items_center().rounded(6).cursor_pointer().text_size(11.5)
+    return div().id(id).h(24).px(8).flex().flex_none().items_center().cursor_pointer().text_size(11.5)
       .bg(on ? t.selected : t.background).text_color(on ? t.foreground : t.muted).hover(s => s.bg(t.hover)).on_click(action).child(label);
   }
 
@@ -187,7 +187,7 @@ export default class Files extends View {
     for (const entry of this.entries.get(prefix) ?? []) {
       if (out.length >= TOTAL) break;
       const path = prefix ? `${prefix}/${entry.name}` : entry.name, open = this.folders.has(path), mark = this.marks[`${this.root}/${path}`];
-      out.push(h_flex().id(`file-${path}`).h(28).flex_none().pl(8 + depth * 18).pr(8).gap(7).items_center().rounded(7).cursor_pointer().hover(s => s.bg(t.hover))
+      out.push(h_flex().id(`file-${path}`).h(24).flex_none().pl(8 + depth * 18).pr(8).gap(7).items_center().cursor_pointer().hover(s => s.bg(t.hover))
         .on_click((_e, cx) => entry.dir ? this.toggle(path, cx) : this.show(path, cx))
         .child(entry.dir ? svg(`mods/my-files/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim) : div().w(12).flex_none())
         .child(svg(`mods/my-files/${entry.dir ? "folder" : "file"}.svg`).size(14).flex_none().text_color(t.muted))
@@ -201,8 +201,8 @@ export default class Files extends View {
   render(cx) {
     if (key() !== this.context?.key) this.refresh(cx);
     const t = theme();
-    return v_flex().id("files").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
-      .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
+    return v_flex().id("files").size_full().min_h(0).overflow_hidden().bg(t.background).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+      .child(h_flex().h(34).flex_none().px(10).gap(8).items_center().border_b(1).border_color(t.border)
         .when(Boolean(this.file), el => el.child(div().id("files-back").w(20).cursor_pointer().text_color(t.muted).on_click((_e, cx) => { const prev = this.mdBack?.pop(); this.show(prev ?? null, prev ? cx : undefined); cx.notify(); }).child("←")))
         .child(div().font_semibold().child("Files"))
         .child(div().flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim).child(this.file ?? this.root?.split(/[\\/]/).pop() ?? ""))
@@ -210,10 +210,10 @@ export default class Files extends View {
           .child(this.chip("md-preview", "Preview", !this.mdSource, t, (_e, cx) => { this.mdSource = false; cx.notify(); }))
           .child(this.chip("md-source", "Source", this.mdSource, t, (_e, cx) => { this.mdSource = true; cx.notify(); }))
           .child(this.chip("md-pane", "↗", false, t, () => this.openPane()))))
-      .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6).children(this.rows("", 0, [], t))
+      .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(2).children(this.rows("", 0, [], t))
         .when(Boolean(this.error) || !this.entries.get("")?.length, el => el.child(div().p(8).text_size(12).text_color(t.dim).child(this.error || (this.loading ? "Loading files…" : this.root ? "No files" : "No folder"))))
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))
-      .when(Boolean(this.file) && this.markdown !== null && !this.mdSource, el => el.child(div().id("files-md-scroll").flex_1().min_h(0).overflow_y_scrollbar().px(16).py(12)
+      .when(Boolean(this.file) && this.markdown !== null && !this.mdSource, el => el.child(div().id("files-md-scroll").flex_1().min_h(0).overflow_y_scrollbar().px(12).py(8)
         .child(TextView.markdown(`files-md-${this.mdVersion}`, this.markdown).selectable(true).on_link_click((url, cx) => this.followLink(url, cx)))))
       .when(Boolean(this.file) && (this.markdown === null || this.mdSource), el => el.child(this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
   }
