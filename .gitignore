@@ -5,6 +5,9 @@
 !/layouts/
 /layouts/*
 !/layouts/my-layout.json
+!/themes/
+/themes/*
+!/themes/navy-olive.json
 !/mods/
 /mods/*
 !/mods/my-files/
